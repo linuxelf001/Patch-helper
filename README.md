@@ -9,19 +9,19 @@ Usage:
   
 where
 
-    o "-b" means that we are checking Ubuntu (this is the default)
+    "-b" means that we are checking Ubuntu (this is the default)
 
-    o "-d" means that we are checking Debian
+    "-d" means that we are checking Debian
 
-    o "-e" means that we are checking Centos
+    "-e" means that we are checking Centos
 
-    o "codename" is the codeword for the distro release
+    "codename" is the codeword for the distro release
 
-    o "kernel" is the version of the Azure-tuned kernel
+    "kernel" is the version of the Azure-tuned kernel
 
-    o "upstream" is the path to store the upstream git tree
+    "upstream" is the path to store the upstream git tree
 
-    o "commit" is the id of the upstream commit to check
+    "commit" is the id of the upstream commit to check
 
 Examples:
 
