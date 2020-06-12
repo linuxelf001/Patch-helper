@@ -199,8 +199,10 @@ if [ -n "$COMMIT" ]; then
 		exit 0
 	fi
 
-	# Check it it's in the changelogs, and under which release
+# Check it it's in the changelogs, and under which release
+# Debian splits long commit titles in the changelogs, so just check the first 72 characters
 	COMMIT_SUBJECT=$(git show -s --format='%s' "$COMMIT" 2>&1)
+	COMMIT_SUBJECT=${COMMIT_SUBJECT::72}
 	CHANGELOG_END=$(grep -nF "$COMMIT_SUBJECT" $CHANGELOG |
 			grep -o '^[[:digit:]]*')
 	[ -z "$CHANGELOG_END" ] && CHANGELOG_END=0
