@@ -63,7 +63,7 @@ ubuntu_get_package_info()
 	wget "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
 		fail "Failed to download the changelog for the Azure kernel"
 
-	PREFIX_ON_CHANGELOG='linux-azure ('
+	PREFIX_ON_CHANGELOG='linux-azure (-[[:digit:]]*\.[[:digit:]]*)? \('
 }
 
 # Find changelog and full kernel version ($FULL_KVER) for a Debian kernel
@@ -90,7 +90,7 @@ debian_get_package_info()
 	wget "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
 		fail "Failed to download the changelog for the Azure kernel"
 
-	PREFIX_ON_CHANGELOG='linux ('
+	PREFIX_ON_CHANGELOG='linux \('
 }
 
 # Find changelog and full kernel version ($FULL_KVER) for a Centos kernel
@@ -173,7 +173,8 @@ done
 [ "$DISTRO" == "centos" ] && centos_get_package_info
 
 # Find the first line that refers to this kernel version
-CHANGELOG_START=$(grep -nm 1 "$FULL_KVER" $CHANGELOG | grep -o '^[[:digit:]]*')
+CHANGELOG_START=$(grep -n "$FULL_KVER" $CHANGELOG | tail -1 |
+					grep -o '^[[:digit:]]*')
 
 # Clone or update the upstream kernel
 UPS_KVER=$(echo "$FULL_KVER" | grep -o '^[[:digit:]]*\.[[:digit:]]*')
@@ -203,12 +204,13 @@ if [ -n "$COMMIT" ]; then
 # Debian splits long commit titles in the changelogs, so just check the first 72 characters
 	COMMIT_SUBJECT=$(git show -s --format='%s' "$COMMIT" 2>&1)
 	COMMIT_SUBJECT=${COMMIT_SUBJECT::72}
+	COMMIT_SUBJECT=${COMMIT_SUBJECT% *}
 	CHANGELOG_END=$(grep -nF "$COMMIT_SUBJECT" $CHANGELOG |
 			grep -o '^[[:digit:]]*')
 	[ -z "$CHANGELOG_END" ] && CHANGELOG_END=0
 	COMMIT_KVER=$(head -n $CHANGELOG_END $CHANGELOG |
 		      tail -n +$CHANGELOG_START |
-		      grep "$PREFIX_ON_CHANGELOG"'[[:digit:]]*\.' |
+		      grep -E "$PREFIX_ON_CHANGELOG"'[[:digit:]]*\.' |
 		      tail -n 1 | grep -o '[[(].*[])]')
 	COMMIT_KVER=${COMMIT_KVER//\(}
 	COMMIT_KVER=${COMMIT_KVER//\[}
