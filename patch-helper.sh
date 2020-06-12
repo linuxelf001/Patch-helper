@@ -63,7 +63,7 @@ ubuntu_get_package_info()
 	wget "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
 		fail "Failed to download the changelog for the Azure kernel"
 
-	PREFIX_ON_CHANGELOG='linux-azure (-[[:digit:]]*\.[[:digit:]]*)? \('
+	PREFIX_ON_CHANGELOG='linux-azure(-[[:digit:]]*\.[[:digit:]]*)? \('
 }
 
 # Find changelog and full kernel version ($FULL_KVER) for a Debian kernel
