@@ -173,7 +173,7 @@ done
 [ "$DISTRO" == "centos" ] && centos_get_package_info
 
 # Find the first line that refers to this kernel version
-CHANGELOG_START=$(grep -n "$FULL_KVER" $CHANGELOG | tail -1 | grep -o '^[[:digit:]]*')
+CHANGELOG_START=$(grep -nm 1 "$FULL_KVER" $CHANGELOG | grep -o '^[[:digit:]]*')
 
 # Clone or update the upstream kernel
 UPS_KVER=$(echo "$FULL_KVER" | grep -o '^[[:digit:]]*\.[[:digit:]]*')
