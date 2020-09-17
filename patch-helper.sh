@@ -45,7 +45,7 @@ ubuntu_get_package_info()
 	local PKGURL="https://packages.ubuntu.com/$CODENAME/linux-modules-$KVER"
 	PACKAGE_INFO=$(mktemp)
 	echo "Fetching info for the Azure kernel package..." 1>&2
-	wget "$PKGURL" -O $PACKAGE_INFO >& /dev/null ||
+	wget --retry-on-host-error --retry-connrefused "$PKGURL" -O $PACKAGE_INFO >& /dev/null ||
 		fail "Failed to download info on the Azure kernel package"
 
 	# Parse the webpage for info
@@ -60,7 +60,7 @@ ubuntu_get_package_info()
 
 	CHANGELOG=$(mktemp)
 	echo "Fetching the changelog for the Azure kernel..." 1>&2
-	wget "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
+	wget --retry-on-host-error --retry-connrefused "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
 		fail "Failed to download the changelog for the Azure kernel"
 
 	PREFIX_ON_CHANGELOG='linux-azure(-[[:digit:]]*\.[[:digit:]]*)? \('
@@ -173,7 +173,7 @@ done
 [ "$DISTRO" == "centos" ] && centos_get_package_info
 
 # Find the first line that refers to this kernel version
-CHANGELOG_START=$(grep -n "$FULL_KVER" $CHANGELOG | tail -1 | grep -o '^[[:digit:]]*')
+CHANGELOG_START=$(grep -nm 1 "$FULL_KVER" $CHANGELOG | grep -o '^[[:digit:]]*')
 
 # Clone or update the upstream kernel
 UPS_KVER=$(echo "$FULL_KVER" | grep -o '^[[:digit:]]*\.[[:digit:]]*')
@@ -203,10 +203,14 @@ if [ -n "$COMMIT" ]; then
 # Debian splits long commit titles in the changelogs, so just check the first 72 characters
 	COMMIT_SUBJECT=$(git show -s --format='%s' "$COMMIT" 2>&1)
 	COMMIT_SUBJECT=${COMMIT_SUBJECT::72}
-	COMMIT_SUBJECT=${COMMIT_SUBJECT% *}
+	# The last word may get moved to a new line
+	[ $(echo -n $COMMIT_SUBJECT | wc -c) -ge 70 ] &&
+		COMMIT_SUBJECT=${COMMIT_SUBJECT% *}
 	CHANGELOG_END=$(grep -nF "$COMMIT_SUBJECT" $CHANGELOG |
 			grep -o '^[[:digit:]]*')
 	[ -z "$CHANGELOG_END" ] && CHANGELOG_END=0
+	[ $(echo $CHANGELOG_END | wc -w) -le 1 ] ||
+		fail "Two patches appear to share the same name"
 	COMMIT_KVER=$(head -n $CHANGELOG_END $CHANGELOG |
 		      tail -n +$CHANGELOG_START |
 		      grep -E "$PREFIX_ON_CHANGELOG"'[[:digit:]]*\.' |
