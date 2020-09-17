@@ -209,6 +209,8 @@ if [ -n "$COMMIT" ]; then
 	CHANGELOG_END=$(grep -nF "$COMMIT_SUBJECT" $CHANGELOG |
 			grep -o '^[[:digit:]]*')
 	[ -z "$CHANGELOG_END" ] && CHANGELOG_END=0
+	[ $(echo $CHANGELOG_END | wc -w) -le 1 ] ||
+		fail "Two patches appear to share the same name"
 	COMMIT_KVER=$(head -n $CHANGELOG_END $CHANGELOG |
 		      tail -n +$CHANGELOG_START |
 		      grep -E "$PREFIX_ON_CHANGELOG"'[[:digit:]]*\.' |
