@@ -45,7 +45,7 @@ ubuntu_get_package_info()
 	local PKGURL="https://packages.ubuntu.com/$CODENAME/linux-modules-$KVER"
 	PACKAGE_INFO=$(mktemp)
 	echo "Fetching info for the Azure kernel package..." 1>&2
-	wget --retry-on-host-error --retry-connrefused "$PKGURL" -O $PACKAGE_INFO >& /dev/null ||
+	wget "$PKGURL" -O $PACKAGE_INFO >& /dev/null ||
 		fail "Failed to download info on the Azure kernel package"
 
 	# Parse the webpage for info
@@ -60,7 +60,7 @@ ubuntu_get_package_info()
 
 	CHANGELOG=$(mktemp)
 	echo "Fetching the changelog for the Azure kernel..." 1>&2
-	wget --retry-on-host-error --retry-connrefused "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
+	wget "$CHANGELOG_URL" -O $CHANGELOG >& /dev/null ||
 		fail "Failed to download the changelog for the Azure kernel"
 
 	PREFIX_ON_CHANGELOG='linux-azure(-[[:digit:]]*\.[[:digit:]]*)? \('
