@@ -203,7 +203,9 @@ if [ -n "$COMMIT" ]; then
 # Debian splits long commit titles in the changelogs, so just check the first 72 characters
 	COMMIT_SUBJECT=$(git show -s --format='%s' "$COMMIT" 2>&1)
 	COMMIT_SUBJECT=${COMMIT_SUBJECT::72}
-	COMMIT_SUBJECT=${COMMIT_SUBJECT% *}
+	# The last word may get moved to a new line
+	[ $(echo -n $COMMIT_SUBJECT | wc -c) -ge 70 ] &&
+		COMMIT_SUBJECT=${COMMIT_SUBJECT% *}
 	CHANGELOG_END=$(grep -nF "$COMMIT_SUBJECT" $CHANGELOG |
 			grep -o '^[[:digit:]]*')
 	[ -z "$CHANGELOG_END" ] && CHANGELOG_END=0
